@@ -1,6 +1,4 @@
 streamlit
-PyPDF2
-groq
-pandas
-numpy
 plotly
+PyPDF2
+pandas
