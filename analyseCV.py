@@ -1,9 +1,11 @@
 import streamlit as st
-from components.i18n import set_language
+from components.i18n import set_language, t
 
 st.set_page_config(page_title="Évaluation GFSI Multilingue", layout="wide")
 
-# Sélection de la langue
 lang = set_language()
 
-st.switch_page("pages/1_Home.py")
+st.title(t("home.title"))
+st.markdown(t("home.description"))
+st.markdown("---")
+st.markdown("⬅️ Utilisez le menu à gauche pour accéder aux différentes fonctionnalités.")
