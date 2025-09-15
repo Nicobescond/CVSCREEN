@@ -2,3 +2,5 @@ streamlit
 plotly
 PyPDF2
 pandas
+groq
+numpy
