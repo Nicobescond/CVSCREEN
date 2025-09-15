@@ -13,10 +13,12 @@ st.title(t("analyse.title"))
 
 # Récupérer clé API Groq
 try:
-    api_key = st.secrets["api_keys"]["groq"]
-except KeyError:
-    st.error("❌ Clé API Groq manquante. Ajoutez-la dans .streamlit/secrets.toml.")
+    api_key = st.secrets.get("groq") or st.secrets.get("api_keys", {}).get("groq")
+
+if not api_key:
+    st.error("❌ Clé API Groq manquante. Ajoutez-la dans les secrets.")
     st.stop()
+
 
 client = groq.Client(api_key=api_key)
 
