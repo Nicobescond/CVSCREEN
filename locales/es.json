@@ -1,0 +1,16 @@
+{
+  "home.title": "Bienvenido",
+  "home.description": "Análisis automatizado de CV GFSI – Elija una función a la izquierda.",
+  "analyse.title": "Análisis de CV",
+  "analyse.select_ref": "Seleccionar un referencial",
+  "analyse.upload_cv": "Subir uno o más CV (solo PDF)",
+  "analyse.run_analysis": "Iniciar análisis con IA",
+  "analyse.comment_area": "Agregar un comentario o complemento manual",
+  "analyse.comment_placeholder": "Escriba sus observaciones adicionales aquí…",
+  "analyse.export_pdf": "Exportar en PDF",
+  "analyse.export_csv": "Exportar en CSV",
+  "admin.title": "Área de Administrador",
+  "admin.upload_ref": "Subir un nuevo referencial (JSON)",
+  "admin.upload_success": "Referencial guardado con éxito.",
+  "admin.upload_fail": "Error al cargar el archivo"
+}
