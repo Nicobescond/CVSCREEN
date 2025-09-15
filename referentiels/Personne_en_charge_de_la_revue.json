@@ -1,0 +1,286 @@
+{
+  "Personne en charge de la revue": {
+    "categorie": "Rôle",
+    "description": "Responsable de la revue technique des rapports d'audit IFS Food",
+    "weight": 1,
+    "references": [
+      "IFS Food V8"
+    ],
+    "subcategories": [
+      {
+        "Profil et Qualifications Initiales": {
+          "categorie": "Profil et qualifications",
+          "description": "Exigences pour les personnes en charge de la revue",
+          "weight": 0.4,
+          "references": [
+            "IFS Food V8"
+          ],
+          "subcategories": [
+            {
+              "Formation et expérience professionnelle": {
+                "categorie": "Formation et expérience",
+                "description": "Exigences de formation et d'expérience professionnelle",
+                "weight": 0.2,
+                "references": [
+                  "IFS Food V8"
+                ],
+                "subcategories": [
+                  {
+                    "Diplôme universitaire": {
+                      "categorie": "Diplôme",
+                      "description": "Posséder un diplôme universitaire dans le domaine alimentaire ou les sciences de la vie",
+                      "weight": 0.1,
+                      "minimum": true,
+                      "references": [
+                        "IFS Food V8"
+                      ]
+                    },
+                    "Expérience professionnelle": {
+                      "categorie": "Expérience",
+                      "description": "Avoir au moins 3 ans d'expérience professionnelle à temps plein dans l'industrie agro-alimentaire",
+                      "weight": 0.1,
+                      "minimum": true,
+                      "references": [
+                        "IFS Food V8"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Qualifications spécifiques": {
+                "categorie": "Qualifications",
+                "description": "Exigences de qualifications spécifiques",
+                "weight": 0.1,
+                "references": [
+                  "IFS Food V8"
+                ],
+                "subcategories": [
+                  {
+                    "Formation sur l'hygiène et l'HACCP": {
+                      "categorie": "Formation",
+                      "description": "Avoir participé à une formation sur l'hygiène et l'HACCP d'une durée minimale de 2 jours/16 heures",
+                      "weight": 0.05,
+                      "minimum": true,
+                      "references": [
+                        "IFS Food V8"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Expérience générale d'audit": {
+                "categorie": "Expérience",
+                "description": "Exigences d'expérience générale d'audit",
+                "weight": 0.1,
+                "references": [
+                  "IFS Food V8"
+                ],
+                "subcategories": [
+                  {
+                    "Assistance à des audits IFS Food complets": {
+                      "categorie": "Assistance",
+                      "description": "Avoir assisté à 2 audits IFS Food complets en tant que stagiaire",
+                      "weight": 0.05,
+                      "minimum": true,
+                      "references": [
+                        "IFS Food V8"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Compétences linguistiques": {
+                "categorie": "Compétences",
+                "description": "Exigences de compétences linguistiques",
+                "weight": 0.1,
+                "references": [
+                  "IFS Food V8"
+                ],
+                "subcategories": [
+                  {
+                    "Maîtrise d'une langue étrangère": {
+                      "categorie": "Maîtrise",
+                      "description": "Devoir maîtriser une langue étrangère si la personne souhaite revoir des rapports d'audit dans cette langue",
+                      "weight": 0.05,
+                      "minimum": true,
+                      "references": [
+                        "IFS Food V8"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Formations internes et IFS": {
+                "categorie": "Formations",
+                "description": "Exigences de formations internes et IFS",
+                "weight": 0.1,
+                "references": [
+                  "IFS Food V8"
+                ],
+                "subcategories": [
+                  {
+                    "Formation interne sur la mission de revue technique": {
+                      "categorie": "Formation interne",
+                      "description": "Avoir suivi une journée de formation interne sur la mission de revue technique",
+                      "weight": 0.05,
+                      "minimum": true,
+                      "references": [
+                        "IFS Food V8"
+                      ]
+                    },
+                    "Formation sur la notation IFS": {
+                      "categorie": "Formation IFS",
+                      "description": "Avoir suivi une journée de formation sur la notation IFS",
+                      "weight": 0.05,
+                      "minimum": true,
+                      "references": [
+                        "IFS Food V8"
+                      ]
+                    },
+                    "Formation en ligne 'Approche Produits et Procédés IFS'": {
+                      "categorie": "Formation en ligne",
+                      "description": "Avoir suivi la formation en ligne 'Approche Produits et Procédés IFS'",
+                      "weight": 0.05,
+                      "minimum": true,
+                      "references": [
+                        "IFS Food V8"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "Maintien de la Qualification": {
+          "categorie": "Maintien de la qualification",
+          "description": "Exigences pour maintenir la qualification",
+          "weight": 0.3,
+          "references": [
+            "IFS Food V8"
+          ],
+          "subcategories": [
+            {
+              "Annuellement": {
+                "categorie": "Annuellement",
+                "description": "Exigences annuelles",
+                "weight": 0.1,
+                "references": [
+                  "IFS Food V8"
+                ],
+                "subcategories": [
+                  {
+                    "Formation interne": {
+                      "categorie": "Formation interne",
+                      "description": "Participer à 2 jours/16 heures de formation interne",
+                      "weight": 0.05,
+                      "minimum": true,
+                      "references": [
+                        "IFS Food V8"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Tous les 2 ans": {
+                "categorie": "Tous les 2 ans",
+                "description": "Exigences tous les 2 ans",
+                "weight": 0.2,
+                "references": [
+                  "IFS Food V8"
+                ],
+                "subcategories": [
+                  {
+                    "Audit IFS Food": {
+                      "categorie": "Audit IFS Food",
+                      "description": "Participer à un audit IFS Food en tant que stagiaire",
+                      "weight": 0.1,
+                      "minimum": true,
+                      "references": [
+                        "IFS Food V8"
+                      ]
+                    },
+                    "Formation de calibration IFS": {
+                      "categorie": "Formation de calibration IFS",
+                      "description": "Participer à une formation de calibration IFS de 2 jours",
+                      "weight": 0.1,
+                      "minimum": true,
+                      "references": [
+                        "IFS Food V8"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "Missions principales de la personne en charge de la revue": {
+          "categorie": "Missions principales",
+          "description": "Exigences pour les missions principales de la personne en charge de la revue",
+          "weight": 0.3,
+          "references": [
+            "IFS Food V8"
+          ],
+          "subcategories": [
+            {
+              "Revues techniques des rapports d'audit IFS Food": {
+                "categorie": "Revues techniques",
+                "description": "Exigences pour les revues techniques des rapports d'audit IFS Food",
+                "weight": 0.15,
+                "references": [
+                  "IFS Food V8"
+                ],
+                "subcategories": [
+                  {
+                    "Cohérence globale des rapports d'audit IFS": {
+                      "categorie": "Cohérence globale",
+                      "description": "Vérifier la cohérence globale des rapports d'audit IFS",
+                      "weight": 0.075,
+                      "minimum": true,
+                      "references": [
+                        "IFS Food V8"
+                      ]
+                    },
+                    "Constats bien formulés et correspondant à l'évaluation": {
+                      "categorie": "Constats",
+                      "description": "Vérifier si les constats sont bien formulés et correspondent à l'évaluation",
+                      "weight": 0.075,
+                      "minimum": true,
+                      "references": [
+                        "IFS Food V8"
+                      ]
+                    },
+                    "Corrections et actions correctives validées par l'auditeur": {
+                      "categorie": "Corrections et actions correctives",
+                      "description": "Vérifier si les corrections et actions correctives ont été validées par l'auditeur et sont pertinentes",
+                      "weight": 0.075,
+                      "minimum": true,
+                      "references": [
+                        "IFS Food V8"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
