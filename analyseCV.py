@@ -11,15 +11,16 @@ import io
 import os
 import re
 import unicodedata
-from reportlab.lib.pagesizes import letter, A4
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.lib import colors
-from reportlab.graphics.shapes import Drawing
-from reportlab.graphics.charts.piecharts import Pie
-from reportlab.graphics.charts.barcharts import VerticalBarChart
-import base64
+
+try:
+    from reportlab.lib.pagesizes import letter, A4
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import inch
+    from reportlab.lib import colors
+    PDF_AVAILABLE = True
+except ImportError:
+    PDF_AVAILABLE = False
 
 # ===================== i18n =====================
 LANGS = {
@@ -46,16 +47,6 @@ T = {
         "es": "Por favor, introduce una clave API válida.",
     },
     "admin": {"fr": "🔒 Administration", "en": "🔒 Administration", "es": "🔒 Administración"},
-    "admin_pwd": {
-        "fr": "Mot de passe admin :",
-        "en": "Admin password:",
-        "es": "Contraseña de administrador:",
-    },
-    "admin_hint": {
-        "fr": "Saisissez le mot de passe admin pour accéder aux fonctions avancées.",
-        "en": "Enter the admin password to access advanced features.",
-        "es": "Introduce la contraseña de administrador para acceder a funciones avanzadas.",
-    },
     "admin_ok": {"fr": "Accès admin validé ✅", "en": "Admin access granted ✅", "es": "Acceso de administrador concedido ✅"},
     "no_refs": {
         "fr": "Aucun référentiel valide trouvé.",
@@ -64,7 +55,7 @@ T = {
     },
     "select_ref": {
         "fr": "📚 Référentiel GFSI :",
-        "en": "📚 GFSI Referencial:",
+        "en": "📚 GFSI Referential:",
         "es": "📚 Referencial GFSI:",
     },
     "meta_version": {"fr": "Version", "en": "Version", "es": "Versión"},
@@ -168,11 +159,6 @@ T = {
         "en": "Saved under",
         "es": "Guardado en",
     },
-    "reload_refs": {
-        "fr": "Recharge des référentiels...",
-        "en": "Reloading referentials...",
-        "es": "Recargando referenciales...",
-    },
     "import_json": {
         "fr": "Importer un fichier JSON",
         "en": "Import a JSON file",
@@ -198,11 +184,6 @@ T = {
         "fr": "📋 Copier le JSON",
         "en": "📋 Copy JSON",
         "es": "📋 Copiar JSON",
-    },
-    "json_copied": {
-        "fr": "JSON copié dans le presse-papiers!",
-        "en": "JSON copied to clipboard!",
-        "es": "¡JSON copiado al portapapeles!",
     },
     "edit_ref": {
         "fr": "Éditer un référentiel existant",
@@ -328,7 +309,11 @@ def jauge(label, value, lang):
         gauge={
             'axis': {'range': [0, 100]},
             'bar': {'color': "green" if value >= 0.75 else "orange" if value >= 0.5 else "red"},
-            'steps': [{'range': [0, 50], 'color': "#f8d7da"}, {'range': [50, 75], 'color': "#fff3cd"}, {'range': [75, 100], 'color': "#d4edda"}]
+            'steps': [
+                {'range': [0, 50], 'color': "#f8d7da"}, 
+                {'range': [50, 75], 'color': "#fff3cd"}, 
+                {'range': [75, 100], 'color': "#d4edda"}
+            ]
         }
     ))
     fig.update_layout(height=300)
@@ -414,13 +399,16 @@ def save_referential_to_json(referential_data: dict, filename: str) -> bool:
             json.dump(referential_data, f, ensure_ascii=False, indent=2)
         return True
     except Exception as e:
-        st.error(f"Save error: {e}")
-        st.info("Files may not persist after reboot on some platforms.")
+        st.error(f"Erreur de sauvegarde: {e}")
+        st.info("ℹ️ Les fichiers peuvent ne pas persister après redémarrage sur certaines plateformes.")
         return False
 
 # ===================== PDF Generation =====================
 def generate_pdf_report(results_all, selected_ref, ref_name, lang):
     """Generate a comprehensive PDF report"""
+    if not PDF_AVAILABLE:
+        raise ImportError("ReportLab n'est pas installé")
+    
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     styles = getSampleStyleSheet()
@@ -471,7 +459,7 @@ def generate_pdf_report(results_all, selected_ref, ref_name, lang):
         story.append(Paragraph(f"{tr('detail_title', lang)} {result['nom']}", styles['Heading2']))
         
         # AI Summary
-        story.append(Paragraph(tr("synth", lang)[4:], styles['Heading3']))  # Remove ### from markdown
+        story.append(Paragraph(tr("synth", lang)[4:], styles['Heading3']))
         story.append(Paragraph(result["synthese"], styles['Normal']))
         story.append(Spacer(1, 20))
         
@@ -498,7 +486,6 @@ def generate_pdf_report(results_all, selected_ref, ref_name, lang):
         
         story.append(PageBreak())
     
-    # Generate PDF
     doc.build(story)
     buffer.seek(0)
     return buffer
@@ -528,7 +515,7 @@ def load_users_config():
                 "role": "admin"
             }
         else:
-            st.error("Aucune configuration d'utilisateur trouvée dans les secrets Streamlit.")
+            st.error("❌ Aucune configuration d'utilisateur trouvée dans les secrets Streamlit.")
             st.info("""
             **Configuration requise dans .streamlit/secrets.toml :**
             
@@ -536,6 +523,13 @@ def load_users_config():
             [users_plain]
             admin = { password = "votre_mot_de_passe", role = "admin" }
             user1 = { password = "autre_mot_de_passe", role = "user" }
+            ```
+            
+            **OU avec mots de passe hashés (recommandé) :**
+            
+            ```toml
+            [users]
+            admin = { password_hash = "sha256_hash", role = "admin" }
             ```
             """)
             st.stop()
@@ -566,72 +560,13 @@ if "authenticated" not in st.session_state:
         "username": None
     })
 
-# Force cache key for referentials refresh
 if "ref_cache_key" not in st.session_state:
     st.session_state.ref_cache_key = 0
 
 # ===================== Login Screen =====================
 if not st.session_state["authenticated"]:
     if "lang" not in st.session_state:
-        st.session_state["lang"] = "fr"
-    
-    lang = st.selectbox(
-        "Language / Langue / Idioma",
-        options=list(LANGS.keys()),
-        format_func=lambda c: LANGS[c],
-        index=list(LANGS.keys()).index(st.session_state["lang"])
-    )
-    st.session_state["lang"] = lang
-    
-    st.title(tr("login_title", lang))
-    
-    with st.form("login_form"):
-        username = st.text_input(tr("username", lang))
-        password = st.text_input(tr("password", lang), type="password")
-        submitted = st.form_submit_button(tr("login_btn", lang))
-        
-        if submitted:
-            if username and password:
-                is_valid, role = check_credentials(username, password)
-                if is_valid:
-                    st.session_state.update({
-                        "authenticated": True,
-                        "role": role,
-                        "username": username
-                    })
-                    st.success(f"{tr('login_success', lang)} ({tr('role', lang)}: {role})")
-                    st.rerun()
-                else:
-                    st.error(tr("login_failed", lang))
-            else:
-                st.warning("Veuillez saisir un nom d'utilisateur et un mot de passe.")
-    
-    with st.expander("Configuration des secrets"):
-        st.code("""
-# Dans .streamlit/secrets.toml
-
-[users_plain]
-admin = { password = "mon_mot_de_passe_admin", role = "admin" }
-user1 = { password = "mot_de_passe_utilisateur", role = "user" }
-
-# OU avec hashes (plus sécurisé)
-[users]
-admin = { password_hash = "votre_hash_sha256", role = "admin" }
-        """)
-    
-    st.stop()
-
-# ===================== Main Interface =====================
-if "lang" not in st.session_state:
-    st.session_state["lang"] = "fr"
-
-lang = st.sidebar.selectbox(
-    "Language / Langue / Idioma",
-    options=list(LANGS.keys()),
-    format_func=lambda c: LANGS[c],
-    index=list(LANGS.keys()).index(st.session_state["lang"])
-)
-st.session_state["lang"] = lang
+        st.session_state["lang"] = lang
 
 st.title(tr("app_title", lang))
 st.caption(f"👤 {st.session_state['username']} • {tr('role', lang)}: {st.session_state['role']}")
@@ -674,15 +609,13 @@ with st.sidebar:
                     if "exigences" in data or "categories" in data:
                         out[file.stem] = data
                 except Exception as e:
-                    st.error(f"Erreur de chargement: {e}")
+                    st.error(f"❌ Erreur de chargement {file.name}: {e}")
         return out
 
     # Refresh button for referentials
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        if st.button(tr("refresh_refs", lang), help="Actualise la liste des référentiels"):
-            st.session_state.ref_cache_key += 1
-            st.rerun()
+    if st.button(tr("refresh_refs", lang), help="Actualise la liste des référentiels"):
+        st.session_state.ref_cache_key += 1
+        st.rerun()
     
     referentials = load_referentials(st.session_state.ref_cache_key)
     if not referentials:
@@ -699,10 +632,10 @@ with st.sidebar:
         st.caption(f"{tr('meta_version', lang)}: {md.get('version','N/A')} | {tr('meta_date', lang)}: {md.get('date_creation', md.get('last_updated','N/A'))}")
 
     model = st.selectbox(tr("model", lang), [
-        "openai/gpt-oss-120b",
         "llama-3.3-70b-versatile",
-        "meta-llama/llama-4-maverick-17b-128e-instruct",
-        "moonshotai/kimi-k2-instruct-0905"
+        "llama-3.1-70b-versatile", 
+        "mixtral-8x7b-32768",
+        "gemma2-9b-it"
     ])
 
 # ===================== Prompt builder =====================
@@ -738,7 +671,7 @@ def build_prompt(selected_ref, cv_text, lang):
 
     lang_text = {
         "fr": "Français",
-        "en": "English",
+        "en": "English", 
         "es": "Español",
     }[lang]
 
@@ -747,11 +680,11 @@ def build_prompt(selected_ref, cv_text, lang):
             "exigence_id": "ID exact",
             "exigence_titre": "Title",
             "category_id": "Category/Subcategory",
-            "statut": "COMPLIANT | TO_REVIEW | NON_COMPLIANT | CONFORME | A CHALLENGER | NON CONFORME | CUMPLE | A REVISAR | NO CUMPLE",
+            "statut": "COMPLIANT | TO_REVIEW | NON_COMPLIANT",
             "justification": "Evidence and reasoning",
             "elements_cv": "CV quotes",
             "confiance": 0.0,
-            "niveau_requis": "obligatoire|recommande|souhaitable|mandatory|recommended|desirable",
+            "niveau_requis": "obligatoire|recommande|souhaitable",
             "ponderation": 1.0
         }],
         "score_global": 0.0,
@@ -761,6 +694,7 @@ def build_prompt(selected_ref, cv_text, lang):
     return f"""
 You are a senior GFSI conformity expert.
 Respond ONLY with STRICTLY VALID JSON using EXACTLY the following keys/schema (keys in English). All texts (justification, synthese) must be written in {lang_text}.
+
 Schema:
 {json.dumps(schema, ensure_ascii=False, indent=2)}
 
@@ -836,7 +770,7 @@ if uploaded_files and st.button(tr("run", lang)):
                     "cv_text": cv_text
                 })
             except Exception as e:
-                st.error(f"Erreur pour {up.name}: {e}")
+                st.error(f"❌ Erreur pour {up.name}: {e}")
 
     if results_all:
         st.subheader(tr("compare", lang))
@@ -864,17 +798,19 @@ if uploaded_files and st.button(tr("run", lang)):
         
         with col2:
             # PDF Report generation
-            try:
-                pdf_buffer = generate_pdf_report(results_all, selected_ref, ref_name, lang)
-                st.download_button(
-                    label=tr("export_pdf", lang),
-                    data=pdf_buffer,
-                    file_name=f"rapport_cv_gfsi_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
-                    mime="application/pdf"
-                )
-            except Exception as e:
-                st.error(f"Erreur génération PDF: {e}")
-                st.info("Installez reportlab: pip install reportlab")
+            if PDF_AVAILABLE:
+                try:
+                    pdf_buffer = generate_pdf_report(results_all, selected_ref, ref_name, lang)
+                    st.download_button(
+                        label=tr("export_pdf", lang),
+                        data=pdf_buffer,
+                        file_name=f"rapport_cv_gfsi_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
+                        mime="application/pdf"
+                    )
+                except Exception as e:
+                    st.error(f"Erreur génération PDF: {e}")
+            else:
+                st.info("📄 PDF non disponible - installez reportlab: pip install reportlab")
 
         for result in results_all:
             st.subheader(f"{tr('detail_title', lang)} {result['nom']}")
@@ -965,34 +901,82 @@ else:
         with colB:
             ref_preview = st.checkbox(tr("preview_only", lang), value=False)
         
-        if st.button(tr("gen_ai", lang)):
-            with st.spinner("Génération IA..."):
+        if st.button(tr("gen_ai", lang)) and exigences_text.strip():
+            with st.spinner("Génération IA en cours..."):
                 gen = None
                 try:
                     prompt = f"""
-Structure these requirements into hierarchical JSON with categories/subcategories, weights summing to 1.0, references and minimums. Respond with STRICT JSON only.
-Date: {datetime.now().date()}
-Text:
+Structure these requirements into hierarchical JSON. Use EXACTLY this structure and respond with STRICT JSON only:
+
+{{
+  "metadata": {{
+    "name": "Référentiel Généré IA",
+    "description": "Référentiel créé automatiquement à partir du texte fourni",
+    "version": "1.0",
+    "date_creation": "{datetime.now().strftime('%Y-%m-%d')}"
+  }},
+  "categories": {{
+    "cat1": {{
+      "name": "category_name",
+      "description": "category description",
+      "weight": 0.5,
+      "subcategories": {{
+        "sub1": {{
+          "name": "subcategory_name", 
+          "description": "subcategory description",
+          "weight": 0.5,
+          "requirements": [
+            {{
+              "id": "req_id",
+              "text": "requirement text",
+              "minimum_acceptable": "minimum level required",
+              "references": ["reference1", "reference2"]
+            }}
+          ]
+        }}
+      }}
+    }}
+  }}
+}}
+
+Requirements text to structure:
 {exigences_text}
+
+IMPORTANT: 
+- Respond ONLY with valid JSON matching the exact structure above
+- No markdown, no explanations, no code blocks
+- Ensure all weights sum to 1.0 within each level
+- Create logical categories and subcategories from the text
+- Extract specific requirements with clear IDs
 """
                     response = client.chat.completions.create(
                         messages=[
-                            {"role": "system", "content": "You are an expert in structuring compliance referentials."},
+                            {"role": "system", "content": "You are an expert in structuring compliance referentials. Respond only with valid JSON."},
                             {"role": "user", "content": prompt}
                         ],
-                        model="llama-3.1-8b-instant",
+                        model=model,
                         max_tokens=4000,
                         temperature=0.1
                     )
                     content = response.choices[0].message.content or ""
-                    m = re.search(r"```json\s*(\{.*?\})\s*```", content, re.DOTALL)
-                    raw_json = m.group(1) if m else content
-                    gen = extract_json_strict(raw_json)
+                    
+                    # Clean the response
+                    content = content.strip()
+                    if content.startswith("```json"):
+                        content = content[7:]
+                    if content.endswith("```"):
+                        content = content[:-3]
+                    content = content.strip()
+                    
+                    gen = extract_json_strict(content)
+                    
                 except Exception as e:
                     st.error(f"Erreur IA: {e}")
 
                 if not gen:
                     st.error(tr("gen_fail", lang))
+                    if content:
+                        st.text_area("Réponse brute de l'IA:", value=content, height=200)
                 else:
                     ok, msg = validate_referential_structure(gen)
                     if not ok:
@@ -1001,26 +985,23 @@ Text:
                     else:
                         st.success(tr("gen_ok", lang))
                         
-                        # Display JSON with copy button
+                        # Display JSON
                         json_str = json.dumps(gen, ensure_ascii=False, indent=2)
                         st.json(gen)
                         
-                        # Copy to clipboard button
-                        col1, col2 = st.columns([1, 3])
-                        with col1:
-                            if st.button(tr("copy_json", lang), key="copy_generated"):
-                                st.text_area(
-                                    "JSON généré (copiez le contenu):", 
-                                    value=json_str, 
-                                    height=200,
-                                    key="json_to_copy"
-                                )
+                        # Copy button
+                        if st.button(tr("copy_json", lang), key="copy_generated"):
+                            st.text_area(
+                                "JSON généré (sélectionnez tout et copiez):", 
+                                value=json_str, 
+                                height=300,
+                                key="json_to_copy"
+                            )
                         
                         if not ref_preview:
                             if save_referential_to_json(gen, ref_filename):
                                 st.success(f"{tr('saved_under', lang)} referentiels/{ref_filename}.json")
-                                st.info(f"Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale pour voir le nouveau référentiel")
-                                # Auto-refresh cache
+                                st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale pour voir le nouveau référentiel")
                                 st.session_state.ref_cache_key += 1
 
     # Import JSON
@@ -1047,7 +1028,7 @@ Text:
                         if save_referential_to_json(data, filename):
                             st.success(f"{tr('saved_under', lang)} referentiels/{filename}.json")
                             st.session_state.ref_cache_key += 1
-                            st.info(f"Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale pour voir le nouveau référentiel")
+                            st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")
             except Exception as e:
                 st.error(f"Erreur JSON: {e}")
 
@@ -1081,7 +1062,7 @@ Text:
                     if save_referential_to_json(data, new_name):
                         st.success(f"{tr('saved_under', lang)} referentiels/{new_name}.json")
                         st.session_state.ref_cache_key += 1
-                        st.info(f"Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")
+                        st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")
             except Exception as e:
                 st.error(f"Erreur JSON: {e}")
 
@@ -1094,4 +1075,62 @@ Text:
             if save_referential_to_json(referentials[src], target):
                 st.success(f"{tr('saved_under', lang)} referentiels/{target}.json")
                 st.session_state.ref_cache_key += 1
-                st.info(f"Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")
+                st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale") "fr"
+    
+    lang = st.selectbox(
+        "Language / Langue / Idioma",
+        options=list(LANGS.keys()),
+        format_func=lambda c: LANGS[c],
+        index=list(LANGS.keys()).index(st.session_state["lang"])
+    )
+    st.session_state["lang"] = lang
+    
+    st.title(tr("login_title", lang))
+    
+    with st.form("login_form"):
+        username = st.text_input(tr("username", lang))
+        password = st.text_input(tr("password", lang), type="password")
+        submitted = st.form_submit_button(tr("login_btn", lang))
+        
+        if submitted:
+            if username and password:
+                is_valid, role = check_credentials(username, password)
+                if is_valid:
+                    st.session_state.update({
+                        "authenticated": True,
+                        "role": role,
+                        "username": username
+                    })
+                    st.success(f"{tr('login_success', lang)} ({tr('role', lang)}: {role})")
+                    st.rerun()
+                else:
+                    st.error(tr("login_failed", lang))
+            else:
+                st.warning("Veuillez saisir un nom d'utilisateur et un mot de passe.")
+    
+    with st.expander("ℹ️ Configuration des secrets"):
+        st.code("""
+# Dans .streamlit/secrets.toml
+
+[users_plain]
+admin = { password = "mon_mot_de_passe_admin", role = "admin" }
+user1 = { password = "mot_de_passe_utilisateur", role = "user" }
+
+# OU avec hashes (plus sécurisé)
+[users]
+admin = { password_hash = "votre_hash_sha256", role = "admin" }
+        """)
+    
+    st.stop()
+
+# ===================== Main Interface =====================
+if "lang" not in st.session_state:
+    st.session_state["lang"] = "fr"
+
+lang = st.sidebar.selectbox(
+    "Language / Langue / Idioma",
+    options=list(LANGS.keys()),
+    format_func=lambda c: LANGS[c],
+    index=list(LANGS.keys()).index(st.session_state["lang"])
+)
+st.session_state["lang"] =
