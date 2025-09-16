@@ -1,0 +1,208 @@
+{
+  "metadata": {
+    "name": "Référentiel Généré IA",
+    "description": "Référentiel créé automatiquement à partir du texte fourni",
+    "version": "1.0",
+    "date_creation": "2025-09-16"
+  },
+  "categories": {
+    "cat1": {
+      "name": "Exigences Générales",
+      "description": "Critères obligatoires pour tout évaluateur IFS Progress Food",
+      "weight": 0.25,
+      "subcategories": {
+        "sub1": {
+          "name": "Critères généraux",
+          "description": "Conditions de base à respecter",
+          "weight": 1.0,
+          "requirements": [
+            {
+              "id": "G1",
+              "text": "Avoir signé un contrat avec un organisme de certification ou un prestataire de services d'évaluation.",
+              "minimum_acceptable": "Signature du contrat",
+              "references": []
+            },
+            {
+              "id": "G2",
+              "text": "Fournir à l'organisme toutes les informations pertinentes sur ses qualifications et compétences.",
+              "minimum_acceptable": "Informations complètes fournies",
+              "references": []
+            },
+            {
+              "id": "G3",
+              "text": "Communiquer tout risque potentiel de non‑impartialité.",
+              "minimum_acceptable": "Déclaration de risques transmise",
+              "references": []
+            },
+            {
+              "id": "G4",
+              "text": "Informer l'organisme de son historique d'évaluations pour respecter la règle de ne pas effectuer plus de trois évaluations consécutives sur le même site.",
+              "minimum_acceptable": "Historique communiqué et conformité à la règle",
+              "references": []
+            }
+          ]
+        }
+      }
+    },
+    "cat2": {
+      "name": "Exigences Candidature Initiale",
+      "description": "Conditions à remplir pour une première qualification d'évaluateur IFS Progress Food",
+      "weight": 0.25,
+      "subcategories": {
+        "sub1": {
+          "name": "Formation",
+          "description": "Diplômes et formations requises",
+          "weight": 0.2,
+          "requirements": [
+            {
+              "id": "F1",
+              "text": "Diplôme universitaire dans le domaine alimentaire ou les sciences de la vie (licence, master ou équivalent) OU diplôme professionnel supérieur dans le domaine alimentaire.",
+              "minimum_acceptable": "Diplôme reconnu obtenu",
+              "references": []
+            },
+            {
+              "id": "F2",
+              "text": "Avoir suivi avec succès la formation officielle d'évaluateur IFS Progress Food d'une durée minimale de huit heures.",
+              "minimum_acceptable": "Formation complétée (≥8 h)",
+              "references": []
+            }
+          ]
+        },
+        "sub2": {
+          "name": "Expérience professionnelle",
+          "description": "Expérience dans l'industrie agroalimentaire ou le conseil",
+          "weight": 0.4,
+          "requirements": [
+            {
+              "id": "E1",
+              "text": "Au moins deux ans d'expérience professionnelle à temps plein dans l'industrie agroalimentaire.",
+              "minimum_acceptable": "≥2 ans d'expérience à temps plein",
+              "references": []
+            },
+            {
+              "id": "E2",
+              "text": "L'expérience doit inclure des fonctions liées à la production alimentaire (assurance qualité, R&D, sécurité des aliments) ou des activités d'audit/évaluation de la sécurité des aliments.",
+              "minimum_acceptable": "Fonctions pertinentes exercées",
+              "references": []
+            },
+            {
+              "id": "E3",
+              "text": "Une expérience dans le conseil peut être reconnue jusqu'à un maximum d'un an.",
+              "minimum_acceptable": "≤1 an d'expérience en conseil accepté",
+              "references": []
+            },
+            {
+              "id": "E4",
+              "text": "Si aucune expérience préalable en audit/évaluation, participation à au moins deux évaluations (IFS Progress Food ou autres audits de sécurité des aliments) en tant qu'observateur ou stagiaire.",
+              "minimum_acceptable": "≥2 évaluations en observation/stage",
+              "references": []
+            }
+          ]
+        },
+        "sub3": {
+          "name": "Compétences et formations supplémentaires",
+          "description": "Compétences complémentaires attendues",
+          "weight": 0.4,
+          "requirements": [
+            {
+              "id": "C1",
+              "text": "Avoir réussi une formation à l'hygiène alimentaire, incluant l'HACCP, basée sur les principes du Codex Alimentarius.",
+              "minimum_acceptable": "Formation HACCP validée",
+              "references": []
+            },
+            {
+              "id": "C2",
+              "text": "Connaître la réglementation locale et celle du pays de destination des produits évalués.",
+              "minimum_acceptable": "Connaissance réglementaire démontrée",
+              "references": []
+            },
+            {
+              "id": "C3",
+              "text": "Avoir une connaissance détaillée de l'approche basée sur les risques des produits et des procédés.",
+              "minimum_acceptable": "Compréhension de l'approche basée sur les risques",
+              "references": []
+            },
+            {
+              "id": "C4",
+              "text": "Maîtrise de la langue locale de l'évaluation.",
+              "minimum_acceptable": "Compétence linguistique suffisante",
+              "references": []
+            }
+          ]
+        }
+      }
+    },
+    "cat3": {
+      "name": "Auditeurs IFS Food déjà qualifiés",
+      "description": "Régime simplifié pour les auditeurs déjà certifiés IFS Food",
+      "weight": 0.25,
+      "subcategories": {
+        "sub1": {
+          "name": "Droits et exemptions",
+          "description": "Avantages accordés aux auditeurs déjà qualifiés",
+          "weight": 1.0,
+          "requirements": [
+            {
+              "id": "Q1",
+              "text": "Droit automatique de réaliser des évaluations IFS Progress Food dans les secteurs déjà confirmés.",
+              "minimum_acceptable": "Droit reconnu sans formation supplémentaire",
+              "references": []
+            },
+            {
+              "id": "Q2",
+              "text": "Exemption de la formation initiale d'évaluateur IFS Progress Food (formation possible en bonne pratique).",
+              "minimum_acceptable": "Exemption appliquée",
+              "references": []
+            }
+          ]
+        }
+      }
+    },
+    "cat4": {
+      "name": "Maintien des Compétences",
+      "description": "Obligations continues pour conserver la qualification d'évaluateur",
+      "weight": 0.25,
+      "subcategories": {
+        "sub1": {
+          "name": "Maintien des exigences initiales",
+          "description": "Conservation permanente des critères de qualification initiaux",
+          "weight": 0.33,
+          "requirements": [
+            {
+              "id": "M1",
+              "text": "Les exigences initiales doivent être maintenues en permanence.",
+              "minimum_acceptable": "Conformité continue aux exigences initiales",
+              "references": []
+            }
+          ]
+        },
+        "sub2": {
+          "name": "Formation interne annuelle",
+          "description": "Formation continue spécifique au programme IFS Progress Food",
+          "weight": 0.33,
+          "requirements": [
+            {
+              "id": "M2",
+              "text": "Participer à une formation interne annuelle d'au moins huit heures dédiée spécifiquement au programme IFS Progress Food (sauf pour les auditeurs IFS Food déjà qualifiés).",
+              "minimum_acceptable": "≥8 h de formation annuelle",
+              "references": []
+            }
+          ]
+        },
+        "sub3": {
+          "name": "Observation d'évaluation",
+          "description": "Surveillance de la performance par observation sur site",
+          "weight": 0.34,
+          "requirements": [
+            {
+              "id": "M3",
+              "text": "Une observation d'évaluation sur site doit être réalisée au moins tous les trois ans (sauf pour les auditeurs IFS Food déjà qualifiés).",
+              "minimum_acceptable": "Observation réalisée ≥ chaque 3 ans",
+              "references": []
+            }
+          ]
+        }
+      }
+    }
+  }
+}
