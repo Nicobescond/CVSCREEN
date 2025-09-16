@@ -1075,7 +1075,7 @@ IMPORTANT:
             if save_referential_to_json(referentials[src], target):
                 st.success(f"{tr('saved_under', lang)} referentiels/{target}.json")
                 st.session_state.ref_cache_key += 1
-                st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale") "fr"
+                                            st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")
     
     lang = st.selectbox(
         "Language / Langue / Idioma",
