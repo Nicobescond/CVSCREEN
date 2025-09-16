@@ -975,7 +975,7 @@ IMPORTANT:
 
                 if not gen:
                     st.error(tr("gen_fail", lang))
-                    if content:
+                    if 'content' in locals() and content:
                         st.text_area("Réponse brute de l'IA:", value=content, height=200)
                 else:
                     ok, msg = validate_referential_structure(gen)
@@ -1075,7 +1075,7 @@ IMPORTANT:
             if save_referential_to_json(referentials[src], target):
                 st.success(f"{tr('saved_under', lang)} referentiels/{target}.json")
                 st.session_state.ref_cache_key += 1
-                                            st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")
+                st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale") "fr"
     
     lang = st.selectbox(
         "Language / Langue / Idioma",
