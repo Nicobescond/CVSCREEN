@@ -1,24 +1,50 @@
 import streamlit as st
-from components.login import check_admin_auth
-from components.i18n import t
 import json
 from pathlib import Path
+from components.i18n import t
+from components.login import require_login
 
-if not check_admin_auth():
-    st.stop()
+require_login(admin_only=True)
 
-st.title(t("admin.title"))
+st.title("👤 Gestion des utilisateurs (admin uniquement)")
 
-uploaded = st.file_uploader(t("admin.upload_ref"), type=["json"])
+USERS_FILE = Path("users.json")
 
-if uploaded:
-    try:
-        ref_data = json.load(uploaded)
-        name = uploaded.name.replace(".json", "")
-        referentials_dir = Path("referentiels")
-        referentials_dir.mkdir(exist_ok=True)
-        with open(referentials_dir / f"{name}.json", "w", encoding="utf-8") as f:
-            json.dump(ref_data, f, indent=2, ensure_ascii=False)
-        st.success(t("admin.upload_success"))
-    except Exception as e:
-        st.error(f"{t('admin.upload_fail')} : {e}")
+# Charger les utilisateurs
+if USERS_FILE.exists():
+    with open(USERS_FILE, "r", encoding="utf-8") as f:
+        users = json.load(f)
+else:
+    users = {"admin": "adminpass"}
+
+# Afficher la liste
+st.subheader("📋 Utilisateurs actuels")
+for username in users:
+    if username == "admin":
+        st.text(f"👑 {username} (admin)")
+    else:
+        col1, col2 = st.columns([3, 1])
+        col1.write(f"👤 {username}")
+        if col2.button("🗑️ Supprimer", key=f"delete_{username}"):
+            del users[username]
+            with open(USERS_FILE, "w", encoding="utf-8") as f:
+                json.dump(users, f, indent=2)
+            st.success(f"Utilisateur '{username}' supprimé.")
+            st.experimental_rerun()
+
+st.markdown("---")
+
+# Formulaire d'ajout/modification
+st.subheader("➕ Ajouter / Modifier un utilisateur")
+new_username = st.text_input("Nom d'utilisateur")
+new_password = st.text_input("Mot de passe", type="password")
+
+if st.button("💾 Enregistrer utilisateur"):
+    if not new_username or not new_password:
+        st.warning("Merci de remplir tous les champs.")
+    else:
+        users[new_username] = new_password
+        with open(USERS_FILE, "w", encoding="utf-8") as f:
+            json.dump(users, f, indent=2)
+        st.success(f"Utilisateur '{new_username}' enregistré / mis à jour.")
+        st.experimental_rerun()
