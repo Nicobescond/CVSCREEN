@@ -415,7 +415,7 @@ def save_referential_to_json(referential_data: dict, filename: str) -> bool:
         return True
     except Exception as e:
         st.error(f"Save error: {e}")
-        st.info("ℹ️ Files may not persist after reboot on some platforms.")
+        st.info("Files may not persist after reboot on some platforms.")
         return False
 
 # ===================== PDF Generation =====================
@@ -528,7 +528,7 @@ def load_users_config():
                 "role": "admin"
             }
         else:
-            st.error("❌ Aucune configuration d'utilisateur trouvée dans les secrets Streamlit.")
+            st.error("Aucune configuration d'utilisateur trouvée dans les secrets Streamlit.")
             st.info("""
             **Configuration requise dans .streamlit/secrets.toml :**
             
@@ -606,7 +606,7 @@ if not st.session_state["authenticated"]:
             else:
                 st.warning("Veuillez saisir un nom d'utilisateur et un mot de passe.")
     
-    with st.expander("ℹ️ Configuration des secrets"):
+    with st.expander("Configuration des secrets"):
         st.code("""
 # Dans .streamlit/secrets.toml
 
@@ -674,7 +674,7 @@ with st.sidebar:
                     if "exigences" in data or "categories" in data:
                         out[file.stem] = data
                 except Exception as e:
-                    st.error(f"❌ {e}")
+                    st.error(f"Erreur de chargement: {e}")
         return out
 
     # Refresh button for referentials
@@ -836,7 +836,7 @@ if uploaded_files and st.button(tr("run", lang)):
                     "cv_text": cv_text
                 })
             except Exception as e:
-                st.error(f"❌ {up.name} : {e}")
+                st.error(f"Erreur pour {up.name}: {e}")
 
     if results_all:
         st.subheader(tr("compare", lang))
@@ -874,7 +874,7 @@ if uploaded_files and st.button(tr("run", lang)):
                 )
             except Exception as e:
                 st.error(f"Erreur génération PDF: {e}")
-                st.info("💡 Installez reportlab: pip install reportlab")
+                st.info("Installez reportlab: pip install reportlab")
 
         for result in results_all:
             st.subheader(f"{tr('detail_title', lang)} {result['nom']}")
@@ -966,7 +966,7 @@ else:
             ref_preview = st.checkbox(tr("preview_only", lang), value=False)
         
         if st.button(tr("gen_ai", lang)):
-            with st.spinner("AI..."):
+            with st.spinner("Génération IA..."):
                 gen = None
                 try:
                     prompt = f"""
@@ -989,7 +989,7 @@ Text:
                     raw_json = m.group(1) if m else content
                     gen = extract_json_strict(raw_json)
                 except Exception as e:
-                    st.error(f"IA: {e}")
+                    st.error(f"Erreur IA: {e}")
 
                 if not gen:
                     st.error(tr("gen_fail", lang))
@@ -1005,11 +1005,10 @@ Text:
                         json_str = json.dumps(gen, ensure_ascii=False, indent=2)
                         st.json(gen)
                         
-                        # Copy to clipboard button (improved)
+                        # Copy to clipboard button
                         col1, col2 = st.columns([1, 3])
                         with col1:
                             if st.button(tr("copy_json", lang), key="copy_generated"):
-                                # Create a text area for manual copy
                                 st.text_area(
                                     "JSON généré (copiez le contenu):", 
                                     value=json_str, 
@@ -1018,10 +1017,9 @@ Text:
                                 )
                         
                         if not ref_preview:
-                           if save_referential_to_json(data, new_name):
-    st.success(f"{tr('saved_under', lang)} referentiels/{new_name}.json")
-    st.session_state.ref_cache_key += 1
-    st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")  
+                            if save_referential_to_json(gen, ref_filename):
+                                st.success(f"{tr('saved_under', lang)} referentiels/{ref_filename}.json")
+                                st.info(f"Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale pour voir le nouveau référentiel")
                                 # Auto-refresh cache
                                 st.session_state.ref_cache_key += 1
 
@@ -1049,9 +1047,9 @@ Text:
                         if save_referential_to_json(data, filename):
                             st.success(f"{tr('saved_under', lang)} referentiels/{filename}.json")
                             st.session_state.ref_cache_key += 1
-                            st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale pour voir le nouveau référentiel")
+                            st.info(f"Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale pour voir le nouveau référentiel")
             except Exception as e:
-                st.error(f"JSON parse: {e}")
+                st.error(f"Erreur JSON: {e}")
 
     # Éditer existant
     with tab_editer:
@@ -1083,9 +1081,9 @@ Text:
                     if save_referential_to_json(data, new_name):
                         st.success(f"{tr('saved_under', lang)} referentiels/{new_name}.json")
                         st.session_state.ref_cache_key += 1
-                        st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")
+                        st.info(f"Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")
             except Exception as e:
-                st.error(f"JSON: {e}")
+                st.error(f"Erreur JSON: {e}")
 
     # Dupliquer
     with tab_dupliquer:
@@ -1096,4 +1094,4 @@ Text:
             if save_referential_to_json(referentials[src], target):
                 st.success(f"{tr('saved_under', lang)} referentiels/{target}.json")
                 st.session_state.ref_cache_key += 1
-                st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale") "
+                st.info(f"Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")
