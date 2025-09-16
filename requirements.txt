@@ -4,4 +4,4 @@ PyPDF2
 pandas
 groq
 numpy
-reportlab
+reportlab==4.0.4
