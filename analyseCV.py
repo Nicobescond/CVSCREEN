@@ -11,6 +11,15 @@ import io
 import os
 import re
 import unicodedata
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib import colors
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.charts.piecharts import Pie
+from reportlab.graphics.charts.barcharts import VerticalBarChart
+import base64
 
 # ===================== i18n =====================
 LANGS = {
@@ -102,6 +111,16 @@ T = {
         "en": "💾 Download CSV",
         "es": "💾 Descargar CSV",
     },
+    "export_pdf": {
+        "fr": "📄 Télécharger Rapport PDF",
+        "en": "📄 Download PDF Report",
+        "es": "📄 Descargar Informe PDF",
+    },
+    "refresh_refs": {
+        "fr": "🔄 Actualiser les référentiels",
+        "en": "🔄 Refresh referentials",
+        "es": "🔄 Actualizar referenciales",
+    },
     "admin_header": {
         "fr": "🛠️ Administration des référentiels",
         "en": "🛠️ Referentials Administration",
@@ -175,6 +194,16 @@ T = {
         "en": "💾 Save import",
         "es": "💾 Guardar importación",
     },
+    "copy_json": {
+        "fr": "📋 Copier le JSON",
+        "en": "📋 Copy JSON",
+        "es": "📋 Copiar JSON",
+    },
+    "json_copied": {
+        "fr": "JSON copié dans le presse-papiers!",
+        "en": "JSON copied to clipboard!",
+        "es": "¡JSON copiado al portapapeles!",
+    },
     "edit_ref": {
         "fr": "Éditer un référentiel existant",
         "en": "Edit an existing referential",
@@ -218,15 +247,18 @@ T = {
         "fr": """1) Choisissez la méthode (Créer / Importer / Éditer / Dupliquer)
 2) Validez la structure JSON (un schéma minimal est exigé)
 3) Sauvegardez pour rendre le référentiel disponible
-4) Revenez en haut pour le sélectionner et lancer une analyse""",
+4) Cliquez sur 'Actualiser' pour mettre à jour la liste
+5) Revenez en haut pour le sélectionner et lancer une analyse""",
         "en": """1) Choose method (Create / Import / Edit / Duplicate)
 2) Validate JSON structure (minimal schema required)
 3) Save to make the referential available
-4) Scroll up to select it and run an analysis""",
+4) Click 'Refresh' to update the list
+5) Scroll up to select it and run an analysis""",
         "es": """1) Elige método (Crear / Importar / Editar / Duplicar)
 2) Valida la estructura JSON (se exige un esquema mínimo)
 3) Guarda para hacerlo disponible
-4) Vuelve arriba para seleccionarlo y lanzar el análisis""",
+4) Haz clic en 'Actualizar' para actualizar la lista
+5) Vuelve arriba para seleccionarlo y lanzar el análisis""",
     },
     "explain_more": {
         "fr": "🔎 Explications détaillées",
@@ -386,39 +418,101 @@ def save_referential_to_json(referential_data: dict, filename: str) -> bool:
         st.info("ℹ️ Files may not persist after reboot on some platforms.")
         return False
 
-# ===================== PAGE CONFIG =====================
-st.set_page_config(page_title="GFSI CV", layout="wide")
+# ===================== PDF Generation =====================
+def generate_pdf_report(results_all, selected_ref, ref_name, lang):
+    """Generate a comprehensive PDF report"""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    styles = getSampleStyleSheet()
+    story = []
+    
+    # Title
+    title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], alignment=1, fontSize=18, spaceAfter=30)
+    story.append(Paragraph(tr("app_title", lang), title_style))
+    story.append(Spacer(1, 20))
+    
+    # Summary section
+    story.append(Paragraph(tr("compare", lang), styles['Heading2']))
+    
+    # Create comparison table
+    table_data = [[
+        tr("candidate", lang),
+        tr("score_global", lang),
+        tr("ok_count", lang),
+        tr("challenge_count", lang),
+        tr("ko_count", lang)
+    ]]
+    
+    for result in results_all:
+        table_data.append([
+            result["nom"],
+            f"{result['score']:.0%}",
+            str(result["conformes"]),
+            str(result["challengers"]),
+            str(result["non_conformes"])
+        ])
+    
+    table = Table(table_data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    story.append(table)
+    story.append(PageBreak())
+    
+    # Detailed analysis for each candidate
+    for result in results_all:
+        story.append(Paragraph(f"{tr('detail_title', lang)} {result['nom']}", styles['Heading2']))
+        
+        # AI Summary
+        story.append(Paragraph(tr("synth", lang)[4:], styles['Heading3']))  # Remove ### from markdown
+        story.append(Paragraph(result["synthese"], styles['Normal']))
+        story.append(Spacer(1, 20))
+        
+        # Requirements details
+        story.append(Paragraph("Détail par exigence:", styles['Heading3']))
+        
+        for item in result["details"]:
+            norm = normalize_status(item.get("statut"))
+            status_symbol = {"OK": "✅", "CHALLENGE": "⚠️", "KO": "❌"}.get(norm, "❓")
+            
+            req_title = f"{status_symbol} {item.get('exigence_titre', '')}"
+            story.append(Paragraph(req_title, styles['Heading4']))
+            
+            justif_text = f"<b>{tr('justif', lang)[1:-1]}</b> {item.get('justification', '')}"
+            story.append(Paragraph(justif_text, styles['Normal']))
+            
+            if item.get('elements_cv'):
+                evidence_text = f"<b>{tr('elements_cv', lang)[1:-1]}</b> {item.get('elements_cv')}"
+                story.append(Paragraph(evidence_text, styles['Normal']))
+            
+            conf_text = f"<b>{tr('confidence', lang)[1:-1]}</b> {float(item.get('confiance', 0)):.0%}"
+            story.append(Paragraph(conf_text, styles['Normal']))
+            story.append(Spacer(1, 10))
+        
+        story.append(PageBreak())
+    
+    # Generate PDF
+    doc.build(story)
+    buffer.seek(0)
+    return buffer
 
-# ===================== AUTH - Gestion unifiée via secrets Streamlit =====================
+# ===================== Auth System =====================
 def load_users_config():
-    """
-    Charge la configuration des utilisateurs depuis les secrets Streamlit.
-    
-    Format attendu dans les secrets (.streamlit/secrets.toml):
-    
-    [users]
-    # Utilisateurs avec hash des mots de passe
-    admin = { password_hash = "hash_sha256_du_mot_de_passe", role = "admin" }
-    user1 = { password_hash = "hash_sha256_du_mot_de_passe", role = "user" }
-    
-    # OU format simple (mot de passe en clair - déconseillé en production)
-    [users_plain]  
-    admin = { password = "mot_de_passe_en_clair", role = "admin" }
-    
-    # OU configuration legacy (rétro-compatibilité)
-    ADMIN_PASSWORD = "mot_de_passe_admin_legacy"
-    """
     users = {}
     
-    # 1. Priorité aux utilisateurs avec mots de passe hashés
     if "users" in st.secrets:
         for username, user_data in st.secrets["users"].items():
             users[username] = {
                 "password_hash": user_data.get("password_hash", ""),
                 "role": user_data.get("role", "user")
             }
-    
-    # 2. Support des mots de passe en clair (pour développement)
     elif "users_plain" in st.secrets:
         for username, user_data in st.secrets["users_plain"].items():
             plain_password = user_data.get("password", "")
@@ -426,8 +520,6 @@ def load_users_config():
                 "password_hash": hashlib.sha256(plain_password.encode()).hexdigest(),
                 "role": user_data.get("role", "user")
             }
-    
-    # 3. Fallback : configuration legacy avec ADMIN_PASSWORD
     else:
         legacy_password = st.secrets.get("ADMIN_PASSWORD", os.environ.get("ADMIN_PASSWORD", ""))
         if legacy_password:
@@ -436,7 +528,6 @@ def load_users_config():
                 "role": "admin"
             }
         else:
-            # Configuration par défaut si aucun secret n'est trouvé
             st.error("❌ Aucune configuration d'utilisateur trouvée dans les secrets Streamlit.")
             st.info("""
             **Configuration requise dans .streamlit/secrets.toml :**
@@ -446,20 +537,12 @@ def load_users_config():
             admin = { password = "votre_mot_de_passe", role = "admin" }
             user1 = { password = "autre_mot_de_passe", role = "user" }
             ```
-            
-            **OU avec mots de passe hashés (recommandé) :**
-            
-            ```toml
-            [users]
-            admin = { password_hash = "sha256_hash", role = "admin" }
-            ```
             """)
             st.stop()
     
     return users
 
 def check_credentials(username: str, password: str):
-    """Vérifie les identifiants d'un utilisateur."""
     users = load_users_config()
     user_data = users.get(username)
     
@@ -472,7 +555,10 @@ def check_credentials(username: str, password: str):
     
     return False, None
 
-# Initialisation de l'état de session
+# ===================== PAGE CONFIG =====================
+st.set_page_config(page_title="GFSI CV", layout="wide")
+
+# ===================== Session State Init =====================
 if "authenticated" not in st.session_state:
     st.session_state.update({
         "authenticated": False,
@@ -480,9 +566,12 @@ if "authenticated" not in st.session_state:
         "username": None
     })
 
-# Écran de connexion
+# Force cache key for referentials refresh
+if "ref_cache_key" not in st.session_state:
+    st.session_state.ref_cache_key = 0
+
+# ===================== Login Screen =====================
 if not st.session_state["authenticated"]:
-    # Langue par défaut pour l'écran de connexion
     if "lang" not in st.session_state:
         st.session_state["lang"] = "fr"
     
@@ -517,7 +606,6 @@ if not st.session_state["authenticated"]:
             else:
                 st.warning("Veuillez saisir un nom d'utilisateur et un mot de passe.")
     
-    # Aide pour la configuration
     with st.expander("ℹ️ Configuration des secrets"):
         st.code("""
 # Dans .streamlit/secrets.toml
@@ -533,8 +621,7 @@ admin = { password_hash = "votre_hash_sha256", role = "admin" }
     
     st.stop()
 
-# ===================== Interface principale =====================
-# Langue (sidebar)
+# ===================== Main Interface =====================
 if "lang" not in st.session_state:
     st.session_state["lang"] = "fr"
 
@@ -546,7 +633,6 @@ lang = st.sidebar.selectbox(
 )
 st.session_state["lang"] = lang
 
-# Titre et info utilisateur
 st.title(tr("app_title", lang))
 st.caption(f"👤 {st.session_state['username']} • {tr('role', lang)}: {st.session_state['role']}")
 
@@ -564,7 +650,6 @@ with st.sidebar:
             st.session_state.pop(key, None)
         st.rerun()
 
-    # Vérification des droits admin
     admin_ok = (st.session_state["role"] == "admin")
     if admin_ok:
         st.success(tr("admin_ok", lang))
@@ -577,8 +662,8 @@ with st.sidebar:
     
     client = groq.Client(api_key=api_key)
 
-    @st.cache_data
-    def load_referentials():
+    # Improved referential loading with manual cache management
+    def load_referentials(cache_key=None):
         out = {}
         ref_dir = Path("referentiels")
         if ref_dir.exists():
@@ -592,7 +677,14 @@ with st.sidebar:
                     st.error(f"❌ {e}")
         return out
 
-    referentials = load_referentials()
+    # Refresh button for referentials
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        if st.button(tr("refresh_refs", lang), help="Actualise la liste des référentiels"):
+            st.session_state.ref_cache_key += 1
+            st.rerun()
+    
+    referentials = load_referentials(st.session_state.ref_cache_key)
     if not referentials:
         st.error(tr("no_refs", lang))
         st.stop()
@@ -757,6 +849,33 @@ if uploaded_files and st.button(tr("run", lang)):
         } for r in results_all])
         st.dataframe(comparison_df, use_container_width=True)
 
+        # Export buttons
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            export_df = pd.DataFrame([d for d in details_export])
+            csv = export_df.to_csv(index=False, encoding="utf-8")
+            st.download_button(
+                label=tr("export", lang), 
+                data=csv, 
+                file_name=f"analyse_cv_gfsi_{datetime.now().strftime('%Y%m%d_%H%M')}.csv", 
+                mime="text/csv"
+            )
+        
+        with col2:
+            # PDF Report generation
+            try:
+                pdf_buffer = generate_pdf_report(results_all, selected_ref, ref_name, lang)
+                st.download_button(
+                    label=tr("export_pdf", lang),
+                    data=pdf_buffer,
+                    file_name=f"rapport_cv_gfsi_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
+                    mime="application/pdf"
+                )
+            except Exception as e:
+                st.error(f"Erreur génération PDF: {e}")
+                st.info("💡 Installez reportlab: pip install reportlab")
+
         for result in results_all:
             st.subheader(f"{tr('detail_title', lang)} {result['nom']}")
             col1, col2 = st.columns([1, 2])
@@ -808,11 +927,12 @@ if uploaded_files and st.button(tr("run", lang)):
 
                 # Export JSON détaillé
                 detailed_json = json.dumps(result, ensure_ascii=False, indent=2)
-                st.download_button(tr("download_json", lang), data=detailed_json.encode("utf-8"), file_name=f"detailed_{result['nom']}.json", mime="application/json")
-
-        export_df = pd.DataFrame([d for d in details_export])
-        csv = export_df.to_csv(index=False, encoding="utf-8")
-        st.download_button(label=tr("export", lang), data=csv, file_name=f"analyse_cv_gfsi_{datetime.now().strftime('%Y%m%d_%H%M')}.csv", mime="text/csv")
+                st.download_button(
+                    tr("download_json", lang), 
+                    data=detailed_json.encode("utf-8"), 
+                    file_name=f"detailed_{result['nom']}.json", 
+                    mime="application/json"
+                )
 
 # ===================== Admin: CRUD Référentiels =====================
 st.divider()
@@ -829,12 +949,22 @@ else:
     # Créer via IA
     with tab_creer:
         st.subheader(tr("create_from_text", lang))
-        exigences_text = st.text_area(tr("paste_here", lang), height=220, placeholder="Ex: The auditor shall ...", help="Collez le texte brut du standard à structurer")
+        exigences_text = st.text_area(
+            tr("paste_here", lang), 
+            height=220, 
+            placeholder="Ex: The auditor shall ...", 
+            help="Collez le texte brut du standard à structurer"
+        )
         colA, colB = st.columns(2)
         with colA:
-            ref_filename = st.text_input(tr("filename", lang), value="nouveau_referentiel", help="Nom du fichier à créer dans /referentiels")
+            ref_filename = st.text_input(
+                tr("filename", lang), 
+                value="nouveau_referentiel", 
+                help="Nom du fichier à créer dans /referentiels"
+            )
         with colB:
-            ref_preview = st.checkbox(tr("preview_only", lang), value=True)
+            ref_preview = st.checkbox(tr("preview_only", lang), value=False)
+        
         if st.button(tr("gen_ai", lang)):
             with st.spinner("AI..."):
                 gen = None
@@ -861,27 +991,48 @@ Text:
                 except Exception as e:
                     st.error(f"IA: {e}")
 
-            if not gen:
-                st.error(tr("gen_fail", lang))
-            else:
-                ok, msg = validate_referential_structure(gen)
-                if not ok:
-                    st.error(f"{tr('json_invalid', lang)} {msg}")
-                    st.json(gen)
+                if not gen:
+                    st.error(tr("gen_fail", lang))
                 else:
-                    st.success(tr("gen_ok", lang))
-                    st.json(gen)
-                    if not ref_preview:
-                        if save_referential_to_json(gen, ref_filename):
-                            st.success(f"{tr('saved_under', lang)} referentiels/{ref_filename}.json")
-                            st.caption(tr("reload_refs", lang))
-                            load_referentials.clear()
-                            st.rerun()
+                    ok, msg = validate_referential_structure(gen)
+                    if not ok:
+                        st.error(f"{tr('json_invalid', lang)} {msg}")
+                        st.json(gen)
+                    else:
+                        st.success(tr("gen_ok", lang))
+                        
+                        # Display JSON with copy button
+                        json_str = json.dumps(gen, ensure_ascii=False, indent=2)
+                        st.json(gen)
+                        
+                        # Copy to clipboard button (improved)
+                        col1, col2 = st.columns([1, 3])
+                        with col1:
+                            if st.button(tr("copy_json", lang), key="copy_generated"):
+                                # Create a text area for manual copy
+                                st.text_area(
+                                    "JSON généré (copiez le contenu):", 
+                                    value=json_str, 
+                                    height=200,
+                                    key="json_to_copy"
+                                )
+                        
+                        if not ref_preview:
+                            if save_referential_to_json(gen, ref_filename):
+                                st.success(f"{tr('saved_under', lang)} referentiels/{ref_filename}.json")
+                                st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale pour voir le nouveau référentiel")
+                                # Auto-refresh cache
+                                st.session_state.ref_cache_key += 1
 
     # Import JSON
     with tab_import:
         st.subheader(tr("import_json", lang))
-        uploaded_json = st.file_uploader(tr("choose_json", lang), type=["json"], accept_multiple_files=False, key="imp_json")
+        uploaded_json = st.file_uploader(
+            tr("choose_json", lang), 
+            type=["json"], 
+            accept_multiple_files=False, 
+            key="imp_json"
+        )
         if uploaded_json is not None:
             try:
                 data = json.loads(uploaded_json.read().decode("utf-8"))
@@ -896,18 +1047,21 @@ Text:
                     if st.button(tr("save_import", lang)):
                         if save_referential_to_json(data, filename):
                             st.success(f"{tr('saved_under', lang)} referentiels/{filename}.json")
-                            load_referentials.clear()
-                            st.rerun()
+                            st.session_state.ref_cache_key += 1
+                            st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale pour voir le nouveau référentiel")
             except Exception as e:
                 st.error(f"JSON parse: {e}")
 
     # Éditer existant
     with tab_editer:
         st.subheader(tr("edit_ref", lang))
-        referentials = load_referentials()
         edit_key = st.selectbox(tr("which_ref", lang), list(referentials.keys()))
         current = referentials[edit_key]
-        raw = st.text_area(tr("edit_here", lang), value=json.dumps(current, ensure_ascii=False, indent=2), height=400)
+        raw = st.text_area(
+            tr("edit_here", lang), 
+            value=json.dumps(current, ensure_ascii=False, indent=2), 
+            height=400
+        )
         col1, col2 = st.columns(2)
         with col1:
             new_name = st.text_input(tr("new_name", lang), value=edit_key)
@@ -921,22 +1075,24 @@ Text:
                     st.error(f"{tr('json_invalid', lang)} {msg}")
                 else:
                     if keep_backup:
-                        save_referential_to_json(current, f"{edit_key}.bak_{datetime.now().strftime('%Y%m%d_%H%M')}")
+                        save_referential_to_json(
+                            current, 
+                            f"{edit_key}.bak_{datetime.now().strftime('%Y%m%d_%H%M')}"
+                        )
                     if save_referential_to_json(data, new_name):
                         st.success(f"{tr('saved_under', lang)} referentiels/{new_name}.json")
-                        load_referentials.clear()
-                        st.rerun()
+                        st.session_state.ref_cache_key += 1
+                        st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")
             except Exception as e:
                 st.error(f"JSON: {e}")
 
     # Dupliquer
     with tab_dupliquer:
         st.subheader(tr("dup", lang))
-        referentials = load_referentials()
         src = st.selectbox(tr("source", lang), list(referentials.keys()), key="dup_src")
         target = st.text_input(tr("target", lang), value=f"{src}_copy")
         if st.button(tr("duplicate", lang)):
             if save_referential_to_json(referentials[src], target):
                 st.success(f"{tr('saved_under', lang)} referentiels/{target}.json")
-                load_referentials.clear()
-                st.rerun()
+                st.session_state.ref_cache_key += 1
+                st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale") "
