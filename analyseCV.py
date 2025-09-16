@@ -1070,9 +1070,20 @@ IMPORTANT:
         st.subheader(tr("edit_ref", lang))
         edit_key = st.selectbox(tr("which_ref", lang), list(referentials.keys()))
         current = referentials[edit_key]
+        
+        # Bouton de téléchargement du référentiel original
+        json_original = json.dumps(current, ensure_ascii=False, indent=2)
+        st.download_button(
+            label="📥 Télécharger ce référentiel JSON" if lang == "fr" else "📥 Download this JSON referential",
+            data=json_original.encode("utf-8"),
+            file_name=f"{edit_key}.json",
+            mime="application/json",
+            help="Téléchargez ce référentiel pour le réutiliser ou le modifier hors ligne"
+        )
+        
         raw = st.text_area(
             tr("edit_here", lang), 
-            value=json.dumps(current, ensure_ascii=False, indent=2), 
+            value=json_original, 
             height=400
         )
         col1, col2 = st.columns(2)
