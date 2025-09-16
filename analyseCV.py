@@ -1133,4 +1133,4 @@ lang = st.sidebar.selectbox(
     format_func=lambda c: LANGS[c],
     index=list(LANGS.keys()).index(st.session_state["lang"])
 )
-st.session_state["lang"] =
+st.session_state["lang"] = lang
