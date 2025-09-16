@@ -1018,9 +1018,10 @@ Text:
                                 )
                         
                         if not ref_preview:
-                            if save_referential_to_json(gen, ref_filename):
-                                st.success(f"{tr('saved_under', lang)} referentiels/{ref_filename}.json")
-                                st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale pour voir le nouveau référentiel")
+                           if save_referential_to_json(data, new_name):
+    st.success(f"{tr('saved_under', lang)} referentiels/{new_name}.json")
+    st.session_state.ref_cache_key += 1
+    st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")  
                                 # Auto-refresh cache
                                 st.session_state.ref_cache_key += 1
 
