@@ -400,12 +400,11 @@ def save_referential_to_json(referential_data: dict, filename: str) -> bool:
         return True
     except Exception as e:
         st.error(f"Erreur de sauvegarde: {e}")
-        st.info("ℹ️ Les fichiers peuvent ne pas persister après redémarrage sur certaines plateformes.")
+        st.info("Les fichiers peuvent ne pas persister après redémarrage sur certaines plateformes.")
         return False
 
 # ===================== PDF Generation =====================
 def generate_pdf_report(results_all, selected_ref, ref_name, lang):
-    """Generate a comprehensive PDF report"""
     if not PDF_AVAILABLE:
         raise ImportError("ReportLab n'est pas installé")
     
@@ -414,15 +413,12 @@ def generate_pdf_report(results_all, selected_ref, ref_name, lang):
     styles = getSampleStyleSheet()
     story = []
     
-    # Title
     title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], alignment=1, fontSize=18, spaceAfter=30)
     story.append(Paragraph(tr("app_title", lang), title_style))
     story.append(Spacer(1, 20))
     
-    # Summary section
     story.append(Paragraph(tr("compare", lang), styles['Heading2']))
     
-    # Create comparison table
     table_data = [[
         tr("candidate", lang),
         tr("score_global", lang),
@@ -454,16 +450,11 @@ def generate_pdf_report(results_all, selected_ref, ref_name, lang):
     story.append(table)
     story.append(PageBreak())
     
-    # Detailed analysis for each candidate
     for result in results_all:
         story.append(Paragraph(f"{tr('detail_title', lang)} {result['nom']}", styles['Heading2']))
-        
-        # AI Summary
         story.append(Paragraph(tr("synth", lang)[4:], styles['Heading3']))
         story.append(Paragraph(result["synthese"], styles['Normal']))
         story.append(Spacer(1, 20))
-        
-        # Requirements details
         story.append(Paragraph("Détail par exigence:", styles['Heading3']))
         
         for item in result["details"]:
@@ -515,7 +506,7 @@ def load_users_config():
                 "role": "admin"
             }
         else:
-            st.error("❌ Aucune configuration d'utilisateur trouvée dans les secrets Streamlit.")
+            st.error("Aucune configuration d'utilisateur trouvée dans les secrets Streamlit.")
             st.info("""
             **Configuration requise dans .streamlit/secrets.toml :**
             
@@ -566,7 +557,65 @@ if "ref_cache_key" not in st.session_state:
 # ===================== Login Screen =====================
 if not st.session_state["authenticated"]:
     if "lang" not in st.session_state:
-        st.session_state["lang"] = lang
+        st.session_state["lang"] = "fr"
+    
+    lang = st.selectbox(
+        "Language / Langue / Idioma",
+        options=list(LANGS.keys()),
+        format_func=lambda c: LANGS[c],
+        index=list(LANGS.keys()).index(st.session_state["lang"])
+    )
+    st.session_state["lang"] = lang
+    
+    st.title(tr("login_title", lang))
+    
+    with st.form("login_form"):
+        username = st.text_input(tr("username", lang))
+        password = st.text_input(tr("password", lang), type="password")
+        submitted = st.form_submit_button(tr("login_btn", lang))
+        
+        if submitted:
+            if username and password:
+                is_valid, role = check_credentials(username, password)
+                if is_valid:
+                    st.session_state.update({
+                        "authenticated": True,
+                        "role": role,
+                        "username": username
+                    })
+                    st.success(f"{tr('login_success', lang)} ({tr('role', lang)}: {role})")
+                    st.rerun()
+                else:
+                    st.error(tr("login_failed", lang))
+            else:
+                st.warning("Veuillez saisir un nom d'utilisateur et un mot de passe.")
+    
+    with st.expander("Configuration des secrets"):
+        st.code("""
+# Dans .streamlit/secrets.toml
+
+[users_plain]
+admin = { password = "mon_mot_de_passe_admin", role = "admin" }
+user1 = { password = "mot_de_passe_utilisateur", role = "user" }
+
+# OU avec hashes (plus sécurisé)
+[users]
+admin = { password_hash = "votre_hash_sha256", role = "admin" }
+        """)
+    
+    st.stop()
+
+# ===================== Main Interface =====================
+if "lang" not in st.session_state:
+    st.session_state["lang"] = "fr"
+
+lang = st.sidebar.selectbox(
+    "Language / Langue / Idioma",
+    options=list(LANGS.keys()),
+    format_func=lambda c: LANGS[c],
+    index=list(LANGS.keys()).index(st.session_state["lang"])
+)
+st.session_state["lang"] = lang
 
 st.title(tr("app_title", lang))
 st.caption(f"👤 {st.session_state['username']} • {tr('role', lang)}: {st.session_state['role']}")
@@ -597,7 +646,6 @@ with st.sidebar:
     
     client = groq.Client(api_key=api_key)
 
-    # Improved referential loading with manual cache management
     def load_referentials(cache_key=None):
         out = {}
         ref_dir = Path("referentiels")
@@ -609,10 +657,9 @@ with st.sidebar:
                     if "exigences" in data or "categories" in data:
                         out[file.stem] = data
                 except Exception as e:
-                    st.error(f"❌ Erreur de chargement {file.name}: {e}")
+                    st.error(f"Erreur de chargement {file.name}: {e}")
         return out
 
-    # Refresh button for referentials
     if st.button(tr("refresh_refs", lang), help="Actualise la liste des référentiels"):
         st.session_state.ref_cache_key += 1
         st.rerun()
@@ -770,7 +817,7 @@ if uploaded_files and st.button(tr("run", lang)):
                     "cv_text": cv_text
                 })
             except Exception as e:
-                st.error(f"❌ Erreur pour {up.name}: {e}")
+                st.error(f"Erreur pour {up.name}: {e}")
 
     if results_all:
         st.subheader(tr("compare", lang))
@@ -783,7 +830,6 @@ if uploaded_files and st.button(tr("run", lang)):
         } for r in results_all])
         st.dataframe(comparison_df, use_container_width=True)
 
-        # Export buttons
         col1, col2 = st.columns(2)
         
         with col1:
@@ -797,7 +843,6 @@ if uploaded_files and st.button(tr("run", lang)):
             )
         
         with col2:
-            # PDF Report generation
             if PDF_AVAILABLE:
                 try:
                     pdf_buffer = generate_pdf_report(results_all, selected_ref, ref_name, lang)
@@ -810,7 +855,7 @@ if uploaded_files and st.button(tr("run", lang)):
                 except Exception as e:
                     st.error(f"Erreur génération PDF: {e}")
             else:
-                st.info("📄 PDF non disponible - installez reportlab: pip install reportlab")
+                st.info("PDF non disponible - installez reportlab: pip install reportlab")
 
         for result in results_all:
             st.subheader(f"{tr('detail_title', lang)} {result['nom']}")
@@ -821,12 +866,10 @@ if uploaded_files and st.button(tr("run", lang)):
                 st.markdown(tr("synth", lang))
                 st.info(result["synthese"])
 
-            # === Explications détaillées ===
             with st.expander(tr("explain_more", lang), expanded=False):
                 df = pd.DataFrame(result["details"])
                 status_emoji = {"OK": "✅", "CHALLENGE": "⚠️", "KO": "❌"}
 
-                # Ce que nous avons cherché + détection naïve dans le CV
                 st.markdown(f"**{tr('what_we_checked', lang)}**")
                 if "exigences" in selected_ref and isinstance(selected_ref["exigences"], dict):
                     for req_id, req in selected_ref["exigences"].items():
@@ -835,7 +878,6 @@ if uploaded_files and st.button(tr("run", lang)):
                         st.write(f"• {req_id} – {req.get('title','')}")
                         st.caption(f"{tr('found_in_cv', lang)}: {', '.join(presence) if presence else '—'}")
 
-                # Détails par exigence
                 for _, row in df.iterrows():
                     norm = normalize_status(row.get("statut"))
                     emoji = status_emoji.get(norm, "❓")
@@ -846,7 +888,6 @@ if uploaded_files and st.button(tr("run", lang)):
                     st.write(f"{tr('confidence', lang)} {float(row.get('confiance',0)):.0%}")
                     st.divider()
 
-                # Détails de scoring
                 st.markdown(f"**{tr('scoring_details', lang)}**")
                 st.write({
                     tr("ok_count", lang): result["conformes"],
@@ -855,13 +896,11 @@ if uploaded_files and st.button(tr("run", lang)):
                     tr("score_global", lang): f"{result['score']:.0%}"
                 })
 
-                # Top manques
                 st.markdown(f"**{tr('top_missing', lang)}**")
                 missing = [d for d in result["details"] if normalize_status(d.get("statut")) == "KO"]
                 for m in missing[:5]:
                     st.write(f"• {m.get('exigence_titre','')}")
 
-                # Export JSON détaillé
                 detailed_json = json.dumps(result, ensure_ascii=False, indent=2)
                 st.download_button(
                     tr("download_json", lang), 
@@ -882,7 +921,6 @@ else:
     tab_names = tr("tabs", lang)
     tab_creer, tab_import, tab_editer, tab_dupliquer = st.tabs(tab_names)
 
-    # Créer via IA
     with tab_creer:
         st.subheader(tr("create_from_text", lang))
         exigences_text = st.text_area(
@@ -960,7 +998,6 @@ IMPORTANT:
                     )
                     content = response.choices[0].message.content or ""
                     
-                    # Clean the response
                     content = content.strip()
                     if content.startswith("```json"):
                         content = content[7:]
@@ -985,11 +1022,9 @@ IMPORTANT:
                     else:
                         st.success(tr("gen_ok", lang))
                         
-                        # Display JSON
                         json_str = json.dumps(gen, ensure_ascii=False, indent=2)
                         st.json(gen)
                         
-                        # Copy button
                         if st.button(tr("copy_json", lang), key="copy_generated"):
                             st.text_area(
                                 "JSON généré (sélectionnez tout et copiez):", 
@@ -1001,10 +1036,9 @@ IMPORTANT:
                         if not ref_preview:
                             if save_referential_to_json(gen, ref_filename):
                                 st.success(f"{tr('saved_under', lang)} referentiels/{ref_filename}.json")
-                                st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale pour voir le nouveau référentiel")
+                                st.info(f"Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale pour voir le nouveau référentiel")
                                 st.session_state.ref_cache_key += 1
 
-    # Import JSON
     with tab_import:
         st.subheader(tr("import_json", lang))
         uploaded_json = st.file_uploader(
@@ -1028,11 +1062,10 @@ IMPORTANT:
                         if save_referential_to_json(data, filename):
                             st.success(f"{tr('saved_under', lang)} referentiels/{filename}.json")
                             st.session_state.ref_cache_key += 1
-                            st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")
+                            st.info(f"Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")
             except Exception as e:
                 st.error(f"Erreur JSON: {e}")
 
-    # Éditer existant
     with tab_editer:
         st.subheader(tr("edit_ref", lang))
         edit_key = st.selectbox(tr("which_ref", lang), list(referentials.keys()))
@@ -1062,11 +1095,10 @@ IMPORTANT:
                     if save_referential_to_json(data, new_name):
                         st.success(f"{tr('saved_under', lang)} referentiels/{new_name}.json")
                         st.session_state.ref_cache_key += 1
-                        st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")
+                        st.info(f"Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")
             except Exception as e:
                 st.error(f"Erreur JSON: {e}")
 
-    # Dupliquer
     with tab_dupliquer:
         st.subheader(tr("dup", lang))
         src = st.selectbox(tr("source", lang), list(referentials.keys()), key="dup_src")
@@ -1075,62 +1107,4 @@ IMPORTANT:
             if save_referential_to_json(referentials[src], target):
                 st.success(f"{tr('saved_under', lang)} referentiels/{target}.json")
                 st.session_state.ref_cache_key += 1
-                st.info(f"💡 Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")
-    
-    lang = st.selectbox(
-        "Language / Langue / Idioma",
-        options=list(LANGS.keys()),
-        format_func=lambda c: LANGS[c],
-        index=list(LANGS.keys()).index(st.session_state["lang"])
-    )
-    st.session_state["lang"] = lang
-    
-    st.title(tr("login_title", lang))
-    
-    with st.form("login_form"):
-        username = st.text_input(tr("username", lang))
-        password = st.text_input(tr("password", lang), type="password")
-        submitted = st.form_submit_button(tr("login_btn", lang))
-        
-        if submitted:
-            if username and password:
-                is_valid, role = check_credentials(username, password)
-                if is_valid:
-                    st.session_state.update({
-                        "authenticated": True,
-                        "role": role,
-                        "username": username
-                    })
-                    st.success(f"{tr('login_success', lang)} ({tr('role', lang)}: {role})")
-                    st.rerun()
-                else:
-                    st.error(tr("login_failed", lang))
-            else:
-                st.warning("Veuillez saisir un nom d'utilisateur et un mot de passe.")
-    
-    with st.expander("ℹ️ Configuration des secrets"):
-        st.code("""
-# Dans .streamlit/secrets.toml
-
-[users_plain]
-admin = { password = "mon_mot_de_passe_admin", role = "admin" }
-user1 = { password = "mot_de_passe_utilisateur", role = "user" }
-
-# OU avec hashes (plus sécurisé)
-[users]
-admin = { password_hash = "votre_hash_sha256", role = "admin" }
-        """)
-    
-    st.stop()
-
-# ===================== Main Interface =====================
-if "lang" not in st.session_state:
-    st.session_state["lang"] = "fr"
-
-lang = st.sidebar.selectbox(
-    "Language / Langue / Idioma",
-    options=list(LANGS.keys()),
-    format_func=lambda c: LANGS[c],
-    index=list(LANGS.keys()).index(st.session_state["lang"])
-)
-st.session_state["lang"] = lang
+                st.info(f"Cliquez sur '{tr('refresh_refs', lang)}' dans la barre latérale")
