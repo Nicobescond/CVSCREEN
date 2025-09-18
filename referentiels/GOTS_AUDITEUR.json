@@ -1,0 +1,169 @@
+{
+  "metadata": {
+    "name": "Référentiel Généré IA",
+    "description": "Référentiel créé automatiquement à partir du texte fourni",
+    "version": "1.0",
+    "date_creation": "2025-09-18"
+  },
+  "categories": {
+    "cat1": {
+      "name": "Formation et Expérience",
+      "description": "Exigences de formation et d'expérience pour les employés",
+      "weight": 0.4,
+      "subcategories": {
+        "sub1": {
+          "name": "Formation de Base",
+          "description": "Niveau de formation minimum requis",
+          "weight": 0.6,
+          "requirements": [
+            {
+              "id": "req_1",
+              "text": "BAC avec 3 ans d’expérience professionnelle pertinente",
+              "minimum_acceptable": "BAC",
+              "references": [
+                "Formation de base"
+              ]
+            },
+            {
+              "id": "req_2",
+              "text": "BAC+2/3 avec expérience professionnelle pertinente",
+              "minimum_acceptable": "BAC+2",
+              "references": [
+                "Formation de base"
+              ]
+            },
+            {
+              "id": "req_3",
+              "text": "BAC+5 préférablement dans le domaine d’activité concerné",
+              "minimum_acceptable": "BAC+5",
+              "references": [
+                "Formation de base"
+              ]
+            }
+          ]
+        },
+        "sub2": {
+          "name": "Certifications et Diplômes",
+          "description": "Certifications et diplômes spécifiques requis",
+          "weight": 0.4,
+          "requirements": [
+            {
+              "id": "req_4",
+              "text": "AO/CRO/CDO sur un programme de certification Greenlife",
+              "minimum_acceptable": "AO/CRO/CDO",
+              "references": [
+                "Certification Greenlife"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "cat2": {
+      "name": "Profil et Spécialisation",
+      "description": "Exigences pour les profils et spécialisations spécifiques",
+      "weight": 0.3,
+      "subcategories": {
+        "sub3": {
+          "name": "Profil Spécialiste",
+          "description": "Exigences pour le profil spécialiste",
+          "weight": 0.5,
+          "requirements": [
+            {
+              "id": "req_5",
+              "text": "Qualification minimum requise d’un auditeur + Minimum 1 an d’expérience professionnelle pertinente",
+              "minimum_acceptable": "Auditeur avec 1 an d'expérience",
+              "references": [
+                "Profil spécialiste"
+              ]
+            }
+          ]
+        },
+        "sub4": {
+          "name": "Profil Stratégique",
+          "description": "Exigences pour le profil stratégique",
+          "weight": 0.5,
+          "requirements": [
+            {
+              "id": "req_6",
+              "text": "Qualification minimum requise d’un auditeur + Minimum 2 ans d’expérience professionnelle pertinente",
+              "minimum_acceptable": "Auditeur avec 2 ans d'expérience",
+              "references": [
+                "Profil stratégique"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "cat3": {
+      "name": "Spécificités GOTS et ZDHC",
+      "description": "Exigences spécifiques pour GOTS et ZDHC",
+      "weight": 0.3,
+      "subcategories": {
+        "sub5": {
+          "name": "GOTS",
+          "description": "Exigences pour GOTS",
+          "weight": 0.5,
+          "requirements": [
+            {
+              "id": "req_7",
+              "text": "Un diplôme universitaire dans le domaine des textiles avec une expérience des questions de gestion de la qualité",
+              "minimum_acceptable": "Diplôme universitaire en textiles",
+              "references": [
+                "GOTS"
+              ]
+            },
+            {
+              "id": "req_8",
+              "text": "Au moins 3 ans d'expérience professionnelle dans l'industrie textile ou dans un domaine connexe, plus une expérience des questions de gestion de la qualité",
+              "minimum_acceptable": "3 ans d'expérience dans l'industrie textile",
+              "references": [
+                "GOTS"
+              ]
+            },
+            {
+              "id": "req_9",
+              "text": "Au moins 2 ans d'expérience professionnelle dans l'audit et la certification des textiles",
+              "minimum_acceptable": "2 ans d'expérience dans l'audit et la certification",
+              "references": [
+                "GOTS"
+              ]
+            }
+          ]
+        },
+        "sub6": {
+          "name": "GOTS (Scope 4) / ZDHC",
+          "description": "Exigences pour GOTS (Scope 4) / ZDHC",
+          "weight": 0.5,
+          "requirements": [
+            {
+              "id": "req_10",
+              "text": "Un diplôme universitaire dans le domaine de la chimie ou de la chimie appliquée aux textiles",
+              "minimum_acceptable": "Diplôme universitaire en chimie",
+              "references": [
+                "GOTS (Scope 4) / ZDHC"
+              ]
+            },
+            {
+              "id": "req_11",
+              "text": "Au moins 3 ans d'expérience professionnelle dans l'industrie chimique textile avec un laboratoire, institut de recherche ou organisme d’évaluation",
+              "minimum_acceptable": "3 ans d'expérience dans l'industrie chimique textile",
+              "references": [
+                "GOTS (Scope 4) / ZDHC"
+              ]
+            },
+            {
+              "id": "req_12",
+              "text": "Au moins 3 ans d'expérience professionnelle comme technicien dans l'industrie textile avec une expertise démontrée dans l’application des intrants chimiques et leur évaluation environnementale et toxique",
+              "minimum_acceptable": "3 ans d'expérience comme technicien dans l'industrie textile",
+              "references": [
+                "GOTS (Scope 4) / ZDHC"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

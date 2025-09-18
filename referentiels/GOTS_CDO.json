@@ -1,0 +1,180 @@
+{
+  "metadata": {
+    "name": "Référentiel Généré IA",
+    "description": "Référentiel créé automatiquement à partir du texte fourni",
+    "version": "1.0",
+    "date_creation": "2025-09-18"
+  },
+  "categories": {
+    "cat1": {
+      "name": "Formation et Expérience",
+      "description": "Exigences de formation et d'expérience pour les employés",
+      "weight": 0.4,
+      "subcategories": {
+        "sub1": {
+          "name": "Niveau BAC+2/3",
+          "description": "Exigences pour les employés avec niveau BAC+2/3",
+          "weight": 0.6,
+          "requirements": [
+            {
+              "id": "req_1",
+              "text": "BAC+2/3 dans le secteur industriel concerné ou QSE",
+              "minimum_acceptable": "BAC+2/3",
+              "references": [
+                "reference1",
+                "reference2"
+              ]
+            },
+            {
+              "id": "req_2",
+              "text": "Niveau BAC+2/3 avec expérience dans le secteur industriel concerné ou QSE",
+              "minimum_acceptable": "BAC+2/3 avec expérience",
+              "references": [
+                "reference3",
+                "reference4"
+              ]
+            }
+          ]
+        },
+        "sub2": {
+          "name": "Profil Spécialiste",
+          "description": "Exigences pour les employés avec profil spécialiste",
+          "weight": 0.2,
+          "requirements": [
+            {
+              "id": "req_3",
+              "text": "Qualification minimum d’un CDO avec 1 an d’expérience professionnelle minimum",
+              "minimum_acceptable": "CDO avec 1 an d'expérience",
+              "references": [
+                "reference5",
+                "reference6"
+              ]
+            },
+            {
+              "id": "req_4",
+              "text": "BAC + 5 dans le secteur industriel concerné ou QSE",
+              "minimum_acceptable": "BAC + 5",
+              "references": [
+                "reference7",
+                "reference8"
+              ]
+            }
+          ]
+        },
+        "sub3": {
+          "name": "Profil Stratégique",
+          "description": "Exigences pour les employés avec profil stratégique",
+          "weight": 0.2,
+          "requirements": [
+            {
+              "id": "req_5",
+              "text": "Qualification minimum d’un CDO avec 1 an d’expérience professionnelle minimum",
+              "minimum_acceptable": "CDO avec 1 an d'expérience",
+              "references": [
+                "reference9",
+                "reference10"
+              ]
+            },
+            {
+              "id": "req_6",
+              "text": "BAC + 5 dans le secteur industriel concerné ou QSE avec expérience",
+              "minimum_acceptable": "BAC + 5 avec expérience",
+              "references": [
+                "reference11",
+                "reference12"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "cat2": {
+      "name": "Spécificité GOTS",
+      "description": "Exigences spécifiques pour les employés impliqués dans la décision de certification",
+      "weight": 0.3,
+      "subcategories": {
+        "sub4": {
+          "name": "Exigences de formation et d'expérience",
+          "description": "Exigences de formation et d'expérience pour les employés impliqués dans la décision de certification",
+          "weight": 0.5,
+          "requirements": [
+            {
+              "id": "req_7",
+              "text": "Un diplôme universitaire dans le domaine des textiles avec une expérience des questions de gestion de la qualité",
+              "minimum_acceptable": "Diplôme universitaire en textiles",
+              "references": [
+                "reference13",
+                "reference14"
+              ]
+            },
+            {
+              "id": "req_8",
+              "text": "Au moins 3 ans d'expérience professionnelle dans l'industrie textile ou dans un domaine connexe, plus une expérience des questions de gestion de la qualité",
+              "minimum_acceptable": "3 ans d'expérience dans l'industrie textile",
+              "references": [
+                "reference15",
+                "reference16"
+              ]
+            },
+            {
+              "id": "req_9",
+              "text": "Au moins 2 ans d'expérience professionnelle dans l'audit et la certification des textiles",
+              "minimum_acceptable": "2 ans d'expérience dans l'audit et la certification",
+              "references": [
+                "reference17",
+                "reference18"
+              ]
+            }
+          ]
+        },
+        "sub5": {
+          "name": "Spécificité GOTS (Scope 4) / ZDHC",
+          "description": "Exigences spécifiques pour les employés impliqués dans la décision d'approbation des intrants",
+          "weight": 0.5,
+          "requirements": [
+            {
+              "id": "req_10",
+              "text": "Un diplôme universitaire dans le domaine de la chimie ou de la chimie appliquée aux textiles",
+              "minimum_acceptable": "Diplôme universitaire en chimie",
+              "references": [
+                "reference19",
+                "reference20"
+              ]
+            },
+            {
+              "id": "req_11",
+              "text": "Au moins 3 ans d'expérience professionnelle dans l'industrie chimique textile avec un laboratoire, institut de recherche ou organisme d'évaluation s'occupant de la fabrication et/ou de l'évaluation de l'environnement et de la toxicité des intrants chimiques",
+              "minimum_acceptable": "3 ans d'expérience dans l'industrie chimique textile",
+              "references": [
+                "reference21",
+                "reference22"
+              ]
+            },
+            {
+              "id": "req_12",
+              "text": "Au moins 3 ans d’expérience professionnelle comme technicien dans l’industrie textile avec une expertise démontrée dans l’application des intrants chimiques et leur évaluation environnementale et toxique",
+              "minimum_acceptable": "3 ans d'expérience comme technicien dans l'industrie textile",
+              "references": [
+                "reference23",
+                "reference24"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "cat3": {
+      "name": "Autres Exigences",
+      "description": "Autres exigences pour les employés",
+      "weight": 0.3,
+      "subcategories": {
+        "sub6": {
+          "name": "Exigences générales",
+          "description": "Exigences générales pour les employés",
+          "weight": 1.0,
+          "requirements": []
+        }
+      }
+    }
+  }
+}
